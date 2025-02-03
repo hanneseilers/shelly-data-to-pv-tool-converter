@@ -1,5 +1,6 @@
 import os
 import csv
+import statistics
 from datetime import datetime
 
 
@@ -40,7 +41,7 @@ def compress_data_to_one_day(data=None, keys_to_use=None):
         power = round(power, 3)
         _data_compressed.append({
             'time': time,
-            'power': power
+            'power': power,
         })
     return _data_compressed
 
@@ -82,17 +83,18 @@ def calculate_stats(data=None):
 
     min_values = {}
     max_values = {}
-    average_values = {}
+    median_values = {}
     for key in data:
         if isinstance(data[key], list):
             min_values[key] = min(data[key])
             max_values[key] = max(data[key])
-            average_values[key] = round(sum(data[key]) / len(data[key]), 3)
+            # average_values[key] = round(sum(data[key]) / len(data[key]), 3)
+            median_values[key] = round(statistics.median(data[key]), 3)
 
-    return min_values, max_values, average_values
+    return min_values, max_values, median_values
 
 
-def write_stats(min_data=None, max_data=None, average_data=None):
+def write_stats(min_data=None, max_data=None, median_data=None, average_data=None):
     if min_data is None:
         min_data = {}
     if max_data is None:
@@ -102,16 +104,20 @@ def write_stats(min_data=None, max_data=None, average_data=None):
 
     min_file_name = 'output/min.csv'
     max_file_name = 'output/max.csv'
+    median_file_name = 'output/median.csv'
     average_file_name = 'output/average.csv'
 
     file_min = open(min_file_name, 'w', encoding='utf-8')
     file_max = open(max_file_name, 'w', encoding='utf-8')
+    file_median = open(median_file_name, 'w', encoding='utf-8')
     file_average = open(average_file_name, 'w', encoding='utf-8')
 
     writer_min = csv.writer(file_min)
     writer_min.writerow(['time', 'power'])
     writer_max = csv.writer(file_max)
     writer_max.writerow(['time', 'power'])
+    writer_median = csv.writer(file_median)
+    writer_median.writerow(['time', 'power'])
     writer_average = csv.writer(file_average)
     writer_average.writerow(['time', 'power'])
 
@@ -122,10 +128,12 @@ def write_stats(min_data=None, max_data=None, average_data=None):
             writer_min.writerow([time, str(min_data[time]).replace('.', ',')])
         if time in max_data:
             writer_max.writerow([time, str(max_data[time]).replace('.', ',')])
+        if time in median_data:
+            writer_median.writerow([time, str(median_data[time]).replace('.', ',')])
         if time in average_data:
             writer_average.writerow([time, str(average_data[time]).replace('.', ',')])
 
-    return min_file_name, max_file_name, average_file_name
+    return min_file_name, max_file_name, median_file_name, average_file_name
 
 
 # ---- MAIN ----
@@ -150,16 +158,16 @@ if __name__ == '__main__':
         _data = combine_data(_data, keys_to_use=['time', 'power'])
 
         # calculate stats
-        _min, _max, _avg = calculate_stats(_data)
+        _min, _max, _med = calculate_stats(_data)
 
         # combine stats to hourly data
         hour_data_min = combine_to_hours(_min)
         hour_data_max = combine_to_hours(_max)
-        hour_data_average = combine_to_hours(_avg)
+        hour_data_median = combine_to_hours(_med)
 
         # write data to csv files
-        _min_filename, _max_filename, _avg_filename = write_stats(min_data=hour_data_min,
-                                                                  max_data=hour_data_max,
-                                                                  average_data=hour_data_average)
+        _min_filename, _max_filename, _median_filename, _avg_filename = write_stats(min_data=hour_data_min,
+                                                                                    max_data=hour_data_max,
+                                                                                    median_data=hour_data_median)
 
         print(f"written data to {_min_filename}, {_max_filename}, {_avg_filename}")
