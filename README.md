@@ -27,7 +27,7 @@ Processes CSV data from Shelly 3EM devices and generates hourly consumption stat
 
 **Output:**
 - `output/min.csv` - Minimum power consumption per hour
-- `output/max.csv` - Maximum power consumption per hour  
+- `output/max.csv` - Maximum power consumption per hour
 - `output/median.csv` - Median power consumption per hour
 
 **Usage:**
@@ -71,7 +71,7 @@ pip install pandas
 
 ## Output Directory
 
-The `output/` directory contains all generated CSV files. This directory should exist before running the scripts.
+The `output/` directory contains all generated CSV files and is included in the repository.
 
 ## License
 
